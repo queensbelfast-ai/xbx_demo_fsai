@@ -16,13 +16,17 @@ def find_xbox_controller():
 event_device_path = find_xbox_controller()
 
 # Function to normalize values to the range -1.0 to 1.0
-def normalize_value(value, min_val, max_val):
+def normalize_steering_value(value, min_val, max_val):
     return (value - min_val) / (max_val - min_val) * 2 - 1
+
+def normalize_value(value, min_val, max_val):
+    return (value - min_val) / (max_val - min_val)
 
 def draw_slider(stdscr, y, value, label, color_pair):
     slider_width = 60
-    slider_fill = int((value + 1) * slider_width / 2)
+    slider_fill = int(max(0, value) * slider_width)
     slider_display = f"[{'#' * slider_fill}{' ' * (slider_width - slider_fill)}]"
+
 
     stdscr.addstr(y * 2, 0, f"{label}: {slider_display} {value:.5f}", curses.color_pair(1) | curses.A_BOLD)
 
@@ -70,7 +74,7 @@ def main(stdscr):
         event = xbox_series_controller.read_one()
         if event and event.type == evdev.ecodes.EV_ABS:
             if event.code == evdev.ecodes.ABS_X:
-                normalized_x = normalize_value(event.value, -32768, 32767)
+                normalized_x = normalize_steering_value(event.value, -32768, 32767)
                 draw_steering_slider(stdscr, 1, normalized_x, "Steering Angle")
             elif event.code == evdev.ecodes.ABS_Z:
                 normalized_left_trigger = normalize_value(event.value, 0, 1023)
