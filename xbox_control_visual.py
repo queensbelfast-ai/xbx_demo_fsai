@@ -1,8 +1,19 @@
 import evdev
 import curses
 
-# Replace '/dev/input/event6' with the correct event device path
-event_device_path = '/dev/input/event6'
+def find_xbox_controller():
+    # Iterate over input devices
+    devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+    
+    # Look for Xbox controller in device names
+    for device in devices:
+        if "Generic X-Box pad" in device.name:
+            return device.path
+    
+    return None
+
+# Replace '/dev/input/event2' with the correct event device path
+event_device_path = find_xbox_controller()
 
 # Function to normalize values to the range -1.0 to 1.0
 def normalize_value(value, min_val, max_val):
@@ -18,6 +29,21 @@ def draw_slider(stdscr, y, value, label, color_pair):
     for i in range(slider_width):
         if i < slider_fill:
             stdscr.chgat(y * 2, i + len(label) + 3, 1, curses.color_pair(color_pair) | curses.A_BOLD)
+
+def draw_steering_slider(stdscr, y, value, label, color_pair):
+    slider_width = 81
+    slider_fill = int((value + 1) * slider_width / 2)
+
+    filled_char = '.'
+    empty_char = '='
+    slider_display = f"[{filled_char * slider_fill}{empty_char * (slider_width - slider_fill)}]"
+
+    stdscr.addstr(y * 2, 0, f"{label}: {slider_display} {value:.5f}", curses.color_pair(1) | curses.A_BOLD)
+
+    for i in range(slider_width):
+        if i < slider_fill:
+            stdscr.chgat(y * 2, i + len(label) + 3, 1, color_pair | curses.A_BOLD)
+
 
 def setup_colors():
     curses.start_color()
@@ -43,7 +69,7 @@ def main(stdscr):
         if event and event.type == evdev.ecodes.EV_ABS:
             if event.code == evdev.ecodes.ABS_X:
                 normalized_x = normalize_value(event.value, -32768, 32767)
-                draw_slider(stdscr, 1, normalized_x, "Steering Angle", 1)
+                draw_steering_slider(stdscr, 1, normalized_x, "Steering Angle", 1)
             elif event.code == evdev.ecodes.ABS_Z:
                 normalized_left_trigger = normalize_value(event.value, 0, 1023)
                 draw_slider(stdscr, 2, normalized_left_trigger, "Left Pedal    ", 2)

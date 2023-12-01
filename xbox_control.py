@@ -1,8 +1,19 @@
 import evdev
 import curses
 
-# Replace '/dev/input/event6' with the correct event device path
-event_device_path = '/dev/input/event6'
+def find_xbox_controller():
+    # Iterate over input devices
+    devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+    
+    # Look for Xbox controller in device names
+    for device in devices:
+        if "Generic X-Box pad" in device.name:
+            return device.path
+    
+    return None
+
+# Replace '/dev/input/event2' with the correct event device path
+event_device_path = find_xbox_controller()
 
 # Function to normalize values to the range -1.0 to 1.0
 def normalize_value(value, min_val, max_val):
