@@ -35,7 +35,7 @@ def draw_slider(stdscr, y, value, label, color_pair):
             stdscr.chgat(y * 2, i + len(label) + 3, 1, curses.color_pair(color_pair) | curses.A_BOLD)
 
 def draw_steering_slider(stdscr, y, value, label):
-    slider_width = 80
+    slider_width = 60
     slider_fill = int((value + 1) * slider_width / 2)
 
     filled_char = '.'
