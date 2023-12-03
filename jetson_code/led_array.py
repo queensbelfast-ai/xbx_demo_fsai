@@ -54,8 +54,9 @@ except FileNotFoundError:
     print(f"Error: Could not find the specified event device at {event_device_path}")
 except PermissionError:
     print(f"Error: Permission denied. Try running the script with elevated privileges using 'sudo'.")
-except Exception as e:
-    print(f"Error: {e}")
+except KeyboardInterrupt:
+    print("\nScript terminated by user. Cleaning up...")
 finally:
     # Clean up GPIO
     GPIO.cleanup()
+    print("GPIO cleanup complete.")
